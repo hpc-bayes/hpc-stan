@@ -119,7 +119,7 @@ def test_optimize_bernoulli_good_ported_from_cmdstanpy(cmdstan_ready, dask_clien
 
     assert "method=optimize" in repr(mle)
     assert "theta" in mle.metadata.stan_vars
-    assert mle.stan_variable("theta").shape == ()
+    np.testing.assert_almost_equal(mle.stan_variable("theta"), 0.5, decimal=2)
     np.testing.assert_almost_equal(mle.optimized_params_dict["theta"], 0.5, decimal=2)
 
 
