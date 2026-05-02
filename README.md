@@ -69,6 +69,31 @@ Each scheduler has a CmdStanPy wrapper and a BridgeStan wrapper. For example,
 `CmdStanPySLURMCluster` uses `dask_jobqueue.SLURMCluster`, and
 `PBSClusterBridgeStan` uses `dask_jobqueue.PBSCluster`.
 
+| Scheduler | CmdStanPy wrapper | BridgeStan wrapper |
+| --- | --- | --- |
+| SLURM | `CmdStanPySLURMCluster` | `SLURMClusterBridgeStan` |
+| PBS | `CmdStanPyPBSCluster` | `PBSClusterBridgeStan` |
+| SGE | `CmdStanPySGECluster` | `SGEClusterBridgeStan` |
+| LSF | `CmdStanPyLSFCluster` | `LSFClusterBridgeStan` |
+| OAR | `CmdStanPyOARCluster` | `OARClusterBridgeStan` |
+| Moab | `CmdStanPyMOABCluster` | `MOABClusterBridgeStan` |
+| HTCondor | `CmdStanPyHTCondorCluster` | `HTCondorClusterBridgeStan` |
+
+## Forwarded Methods
+
+CmdStanPy wrappers forward these `CmdStanModel` methods through Dask:
+
+`code`, `compile`, `diagnose`, `exe_info`, `format`,
+`generate_quantities`, `laplace_sample`, `log_prob`, `optimize`,
+`pathfinder`, `sample`, `src_info`, and `variational`.
+
+BridgeStan wrappers forward these `StanModel` methods through Dask:
+
+`log_density`, `log_density_gradient`, `log_density_hessian`,
+`log_density_hessian_vector_product`, `model_info`, `name`, `new_rng`,
+`param_constrain`, `param_names`, `param_num`, `param_unc_names`,
+`param_unc_num`, `param_unconstrain`, and `param_unconstrain_json`.
+
 ## Installation
 
 Using pip:
@@ -132,6 +157,13 @@ vb_future = stan.variational(data="data.json", algorithm="meanfield")
 
 These return Dask futures for single backend method calls. Use the client to
 gather them when needed.
+
+For complete cluster/method examples, see:
+
+- `examples/supported_methods_by_cluster.py`
+- `examples/cmdstanpy_cluster_methods_template.py`
+- `examples/bridgestan_cluster_methods_template.py`
+- `examples/full_stan_workflow.py`
 
 ## BridgeStan Example
 
