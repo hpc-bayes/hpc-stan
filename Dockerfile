@@ -1,23 +1,34 @@
-FROM ubuntu:latest
+FROM python:3.11-slim-bookworm
+
 LABEL authors="Brian Parbhu"
+LABEL description="Development and test image for hpc-stan"
 
-# Use an official Python runtime as a parent image
-FROM python:3.11-slim-buster
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV PIP_NO_CACHE_DIR=1
 
-# Set the working directory in the container to /app
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-ADD . /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        ca-certificates \
+        curl \
+        git \
+        make \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir bridgestan pystan cmdstanpy dask-jobqueue
+COPY requirements.txt pyproject.toml setup.py README.md ./
+COPY hpc_stan ./hpc_stan
+COPY tests ./tests
 
-# Make port 80 available to the world outside this container
-EXPOSE 80
+RUN python -m pip install --upgrade pip \
+    && python -m pip install -r requirements.txt \
+    && python -m pip install -e .
 
-# Run app.py when the container launches
-CMD ["python", "app.py"]
+# Set INSTALL_CMDSTAN=true at build time to include a local CmdStan toolchain.
+# Example: docker build --build-arg INSTALL_CMDSTAN=true -t hpc-stan .
+ARG INSTALL_CMDSTAN=false
+RUN if [ "$INSTALL_CMDSTAN" = "true" ]; then python -m cmdstanpy.install_cmdstan --cores 2; fi
 
-
-ENTRYPOINT ["top", "-b"]
+CMD ["python", "-m", "pytest", "-q"]

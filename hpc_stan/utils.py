@@ -1,18 +1,26 @@
-import os
 from getpass import getpass
+from pathlib import Path
 
 
-def forward_dask_dashboard(cluster_address, remote_port=8787, local_port=8787, username=None, password=None):
+def forward_dask_dashboard(
+    cluster_address,
+    remote_port=8787,
+    local_port=8787,
+    username=None,
+    password=None,
+    key_filename=None,
+):
     from sshtunnel import SSHTunnelForwarder
 
     username = username if username else input("Enter your username: ")
-    password = password if password else getpass("Enter your password: ")
+    if password is None and key_filename is None:
+        password = getpass("Enter your SSH password, or Ctrl-C to use key/agent auth instead: ")
 
-    # Note: by default, Dask's dashboard is served on port 8787
     server = SSHTunnelForwarder(
         cluster_address,
         ssh_username=username,
         ssh_password=password,
+        ssh_pkey=key_filename,
         remote_bind_address=('localhost', remote_port),
         local_bind_address=('localhost', local_port)
     )
@@ -20,31 +28,62 @@ def forward_dask_dashboard(cluster_address, remote_port=8787, local_port=8787, u
     server.start()
     print(f"Dashboard is being served locally at localhost:{local_port}")
 
-    # It's important to remember to close the server when it's no longer needed
-    # server.stop()
+    return server
 
 
-def submit_to_cluster(cluster_address, username=None, password=None):
+def submit_to_cluster(
+    cluster_address,
+    username=None,
+    password=None,
+    key_filename=None,
+    script_path=None,
+    remote_script_path="remote_python_script.py",
+    command=None,
+    allow_unknown_host=False,
+    stream_output=False,
+):
     import paramiko
 
     username = username if username else input("Enter your username: ")
-    password = password if password else getpass("Enter your password: ")
+    if password is None and key_filename is None:
+        password = getpass("Enter your SSH password, or Ctrl-C to use key/agent auth instead: ")
+
+    local_script = Path(script_path or "your_python_script.py").expanduser()
+    if not local_script.exists():
+        raise FileNotFoundError(f"Script not found: {local_script}")
 
     ssh = paramiko.SSHClient()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(cluster_address, username=username, password=password)
+    ssh.load_system_host_keys()
+    if allow_unknown_host:
+        ssh.set_missing_host_key_policy(paramiko.WarningPolicy())
+    else:
+        ssh.set_missing_host_key_policy(paramiko.RejectPolicy())
 
-    # Assuming the Python script is located in the same directory as this Python file
-    script_path = os.path.join(os.getcwd(), 'your_python_script.py')
-    sftp = ssh.open_sftp()
-    sftp.put(script_path, 'remote_python_script.py')
-    sftp.close()
+    try:
+        ssh.connect(
+            cluster_address,
+            username=username,
+            password=password,
+            key_filename=key_filename,
+            look_for_keys=True,
+            allow_agent=True,
+        )
 
-    # Modify the command as per your cluster's requirements
-    command = "python remote_python_script.py"
+        sftp = ssh.open_sftp()
+        try:
+            sftp.put(str(local_script), remote_script_path)
+        finally:
+            sftp.close()
 
-    stdin, stdout, stderr = ssh.exec_command(command)
-    print(stdout.read().decode())
-    print(stderr.read().decode())
+        remote_command = command or f"python {remote_script_path}"
+        _, stdout, stderr = ssh.exec_command(remote_command)
+        stdout_text = stdout.read().decode()
+        stderr_text = stderr.read().decode()
 
-    ssh.close()
+        if stream_output:
+            print(stdout_text)
+            print(stderr_text)
+
+        return stdout_text, stderr_text
+    finally:
+        ssh.close()
