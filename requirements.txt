@@ -1,0 +1,8 @@
+bridgestan
+cmdstanpy
+dask[distributed]
+dask-jobqueue
+numpy
+pandas
+pytest
+scipy

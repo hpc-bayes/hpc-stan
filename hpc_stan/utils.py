@@ -1,12 +1,10 @@
-# utils.py
 import os
 from getpass import getpass
-import paramiko
 
-from sshtunnel import SSHTunnelForwarder
-from getpass import getpass
 
 def forward_dask_dashboard(cluster_address, remote_port=8787, local_port=8787, username=None, password=None):
+    from sshtunnel import SSHTunnelForwarder
+
     username = username if username else input("Enter your username: ")
     password = password if password else getpass("Enter your password: ")
 
@@ -27,6 +25,8 @@ def forward_dask_dashboard(cluster_address, remote_port=8787, local_port=8787, u
 
 
 def submit_to_cluster(cluster_address, username=None, password=None):
+    import paramiko
+
     username = username if username else input("Enter your username: ")
     password = password if password else getpass("Enter your password: ")
 

@@ -1,16 +1,55 @@
-# __init__.py
+"""HPC/cloud-friendly Dask wrappers for CmdStanPy and BridgeStan."""
 
-# For CmdStanPy
-from .hpc_cmdstanpy import CmdStanSLURMCluster, \
-    CmdStanPBSCluster, CmdStanSGECluster, CmdStanLSFCluster,\
-    CmdStanOARCluster, CmdStanMOABCluster, CmdStanHTCondorCluster
+from hpc_stan.hpc_bridgestan import (
+    HPCBridgeStanBase,
+    HTCondorClusterBridgeStan,
+    LSFClusterBridgeStan,
+    MOABClusterBridgeStan,
+    OARClusterBridgeStan,
+    PBSClusterBridgeStan,
+    SGEClusterBridgeStan,
+    SLURMClusterBridgeStan,
+)
+from hpc_stan.hpc_cmdstanpy import (
+    BaseClusterCmdStanPy,
+    CmdStanHTCondorCluster,
+    CmdStanLSFCluster,
+    CmdStanMOABCluster,
+    CmdStanOARCluster,
+    CmdStanPBSCluster,
+    CmdStanSGECluster,
+    CmdStanSLURMCluster,
+    CmdStanPyHTCondorCluster,
+    CmdStanPyLSFCluster,
+    CmdStanPyMOABCluster,
+    CmdStanPyOARCluster,
+    CmdStanPyPBSCluster,
+    CmdStanPySGECluster,
+    CmdStanPySLURMCluster,
+)
 
-# For PyStan
-from .hpc_pystan import PyStanSLURMCluster, PyStanPBSCluster, \
-    PyStanSGECluster, PyStanLSFCluster, PyStanOARCluster, PyStanMOABCluster, \
-    PyStanHTCondorCluster
-
-# For BridgeStan
-from .hpc_bridgestan import SLURMClusterBridgeStan, \
-    PBSClusterBridgeStan, SGEClusterBridgeStan, LSFClusterBridgeStan, \
-    OARClusterBridgeStan, MOABClusterBridgeStan, HTCondorClusterBridgeStan
+__all__ = [
+    "BaseClusterCmdStanPy",
+    "CmdStanHTCondorCluster",
+    "CmdStanLSFCluster",
+    "CmdStanMOABCluster",
+    "CmdStanOARCluster",
+    "CmdStanPBSCluster",
+    "CmdStanSGECluster",
+    "CmdStanSLURMCluster",
+    "CmdStanPyHTCondorCluster",
+    "CmdStanPyLSFCluster",
+    "CmdStanPyMOABCluster",
+    "CmdStanPyOARCluster",
+    "CmdStanPyPBSCluster",
+    "CmdStanPySGECluster",
+    "CmdStanPySLURMCluster",
+    "HPCBridgeStanBase",
+    "HTCondorClusterBridgeStan",
+    "LSFClusterBridgeStan",
+    "MOABClusterBridgeStan",
+    "OARClusterBridgeStan",
+    "PBSClusterBridgeStan",
+    "SGEClusterBridgeStan",
+    "SLURMClusterBridgeStan",
+]

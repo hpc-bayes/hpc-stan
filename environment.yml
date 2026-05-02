@@ -6,6 +6,7 @@ dependencies:
   - pip
   - pip:
     - bridgestan
-    - pystan
     - cmdstanpy
+    - dask[distributed]
     - dask-jobqueue
+    - pytest
